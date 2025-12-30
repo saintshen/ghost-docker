@@ -1,0 +1,47 @@
+{
+    # We rely on Cloudflare Tunnel for TLS. Prevent Caddy from trying to do ACME.
+    auto_https off
+}
+
+{$DOMAIN} {
+    import snippets/Logging
+    import snippets/TrafficAnalytics
+    import snippets/ActivityPub
+
+    # Forward requests to Ghost and ensure Ghost sees HTTPS and the real client IP
+    handle {
+        reverse_proxy ghost:2368 {
+            header_up Host {http.request.host}
+            header_up X-Real-IP {http.request.remote.host}
+            header_up X-Forwarded-For {http.request.remote.host}
+            # Even though cloudflared connects over HTTP to Caddy, the original client used HTTPS.
+            # Force this so Ghost generates correct HTTPS URLs and redirects.
+            header_up X-Forwarded-Proto https
+            header_up X-Forwarded-Host {http.request.host}
+        }
+    }
+
+    # gzip, security headers, etc.
+    encode gzip
+    import snippets/SecurityHeaders
+}
+
+# Optional: separate admin domain (uncomment and set {$ADMIN_DOMAIN} if you use it)
+# {$ADMIN_DOMAIN} {
+# 	import snippets/Logging
+# 	import snippets/TrafficAnalytics
+# 	import snippets/ActivityPub
+#
+# 	handle {
+# 		reverse_proxy ghost:2368 {
+# 			header_up Host {http.request.host}
+# 			header_up X-Real-IP {http.request.remote.host}
+# 			header_up X-Forwarded-For {http.request.remote.host}
+# 			header_up X-Forwarded-Proto https
+# 			header_up X-Forwarded-Host {http.request.host}
+# 		}
+# 	}
+#
+# 	encode gzip
+# 	import snippets/SecurityHeaders
+# }
