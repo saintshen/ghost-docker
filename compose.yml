@@ -128,7 +128,7 @@ services:
 
   tinybird-login:
     build:
-      context: ${REPO_ROOT}/tinybird
+      context: ./tinybird
       dockerfile: Dockerfile
     working_dir: /home/tinybird
     command: /usr/local/bin/tinybird-login
