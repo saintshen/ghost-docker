@@ -12,7 +12,7 @@ services:
       ADMIN_DOMAIN: ${ADMIN_DOMAIN:-}
       ACTIVITYPUB_TARGET: ${ACTIVITYPUB_TARGET:-https://ap.ghost.org}
     volumes:
-      - ./caddy:/etc/caddy
+      - ${REPO_ROOT}/caddy:/etc/caddy
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
@@ -26,7 +26,7 @@ services:
     restart: always
     # This is required to import current config when migrating
     env_file:
-      - .env
+      - stack.env
     environment:
       NODE_ENV: production
       url: https://${DOMAIN:?DOMAIN environment variable is required}
@@ -71,7 +71,7 @@ services:
       MYSQL_MULTIPLE_DATABASES: activitypub
     volumes:
       - ${MYSQL_DATA_LOCATION:-./data/mysql}:/var/lib/mysql
-      - ./mysql-init:/docker-entrypoint-initdb.d
+      - ${REPO_ROOT}/mysql-init:/docker-entrypoint-initdb.d
     healthcheck:
       test: mysqladmin ping -p$$MYSQL_ROOT_PASSWORD -h 127.0.0.1
       interval: 1s
@@ -128,7 +128,7 @@ services:
 
   tinybird-login:
     build:
-      context: ./tinybird
+      context: ${REPO_ROOT}/tinybird
       dockerfile: Dockerfile
     working_dir: /home/tinybird
     command: /usr/local/bin/tinybird-login
@@ -166,7 +166,7 @@ services:
 
   tinybird-deploy:
     build:
-      context: ./tinybird
+      context: ${REPO_ROOT}/tinybird
       dockerfile: Dockerfile
     working_dir: /data/tinybird
     command: >
